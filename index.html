@@ -61,89 +61,87 @@
     align-items:center;
     justify-content:center;
     font-size:14px;
-    line-height:1;
     cursor:pointer;
   }
 
   @keyframes wobble {
-    0% { transform:rotate(-2deg); }
-    50% { transform:rotate(2deg); }
-    100% { transform:rotate(-2deg); }
+    0% { transform:rotate(-10deg); }
+    50% { transform:rotate(10deg); }
+    100% { transform:rotate(-10deg); }
   }
 
   .okno.wobble {
-    animation: wobble 1.2s infinite;
+    animation: wobble 0.2s infinite;
   }
 </style>
 </head>
 <body>
 
 <script>
-// -------------------------------
-// KONFIGURACJA
-// -------------------------------
+// --------------------------------------
+// ULTRA SPEED
+// --------------------------------------
+const spawnInterval = 20;     // było 600 → teraz 20 ms
+const maxWindows = 1000;      // było 80 → teraz 1000
+const speedMultiplier = 20;   // było 4 → teraz 20x szybciej
+
+const minLife = 1000;         // 1 sekunda życia
+const maxLife = 4000;         // max 4 sekundy
+
 const images = [
-  "https://via.placeholder.com/400x220?text=1",
-  "https://via.placeholder.com/400x220?text=2",
-  "https://via.placeholder.com/400x220?text=3"
+  "https://via.placeholder.com/400x220?text=A",
+  "https://via.placeholder.com/400x220?text=B",
+  "https://via.placeholder.com/400x220?text=C"
 ];
 
 const texts = [
-  "KIEDY HOI KIEDY HOI KIEDY HOI KIEDY HOI KIEDY HOI ",
-  "O TAK CHODZMY FACEIT PROSZE WAS KURWA",
-  "NIGGER NIGGER NIGGER NIGGER NIGGER NIGGER",
-  "DOBROCZYNCA TO PIES PIERDOLONY",
-  "NAKY TO TOKSYCZNA KURWA POWTARZAM WIDZOWIE",
-  "CWEL CWEL CWEL CWEL CWEL CWEL CWEL CWEL",
-  "JAREK NIE KRZYCZ PSLPLSPLSPLSPLS",
-  "jeden spi skibidi"
+  "KIEDY HOI",
+  "FACEIT PROSZE",
+  "NIGGER NIGGER",
+  "DOBROCZYŃCA PIES",
+  "NAKY TOKSYCZNA",
+  "CWEL CWEL CWEL",
+  "JAREK NIE KRZYCZ",
+  "skibidi ohio rizz"
 ];
-
-const spawnInterval = 600; 
-const maxWindows = 80;    
 
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// -------------------------------
-// TWORZENIE OKIENKA
-// -------------------------------
 function createWindow() {
-  if (document.querySelectorAll('.okno').length >= maxWindows) return;
+  if (document.querySelectorAll(".okno").length >= maxWindows) return;
 
-  const win = document.createElement('div');
-  win.className = 'okno wobble';
+  const win = document.createElement("div");
+  win.className = "okno wobble";
 
-  const startX = randInt(0, window.innerWidth - 220);
-  const startY = randInt(0, window.innerHeight - 180);
+  win.style.left = randInt(0, window.innerWidth - 220) + "px";
+  win.style.top = randInt(0, window.innerHeight - 180) + "px";
 
-  win.style.left = startX + 'px';
-  win.style.top = startY + 'px';
-
-  const close = document.createElement('div');
-  close.className = 'close-btn';
-  close.textContent = '×';
+  const close = document.createElement("div");
+  close.className = "close-btn";
+  close.textContent = "×";
   close.onclick = () => win.remove();
   win.appendChild(close);
 
-  const img = document.createElement('img');
+  const img = document.createElement("img");
   img.src = images[Math.floor(Math.random() * images.length)];
   win.appendChild(img);
 
-  const caption = document.createElement('div');
-  caption.className = 'caption';
+  const caption = document.createElement("div");
+  caption.className = "caption";
   caption.textContent = texts[Math.floor(Math.random() * texts.length)];
   win.appendChild(caption);
 
   document.body.appendChild(win);
 
-  let dx = (Math.random()*3 + 0.7) * (Math.random() < 0.5 ? 1 : -1);
-  let dy = (Math.random()*2 + 0.7) * (Math.random() < 0.5 ? 1 : -1);
+  let dx = (Math.random() * 4 + 2) * (Math.random() < 0.5 ? 1 : -1) * speedMultiplier;
+  let dy = (Math.random() * 4 + 2) * (Math.random() < 0.5 ? 1 : -1) * speedMultiplier;
 
   let paused = false;
-  win.addEventListener('mouseenter', () => paused = true);
-  win.addEventListener('mouseleave', () => paused = false);
+
+  win.addEventListener("mouseenter", () => paused = true);
+  win.addEventListener("mouseleave", () => paused = false);
 
   function move() {
     if (!document.body.contains(win)) return;
@@ -154,44 +152,38 @@ function createWindow() {
 
       if (x <= 0) { x = 0; dx = Math.abs(dx); }
       if (y <= 0) { y = 0; dy = Math.abs(dy); }
-      if (x + win.offsetWidth >= window.innerWidth) { x = window.innerWidth - win.offsetWidth; dx = -Math.abs(dx); }
-      if (y + win.offsetHeight >= window.innerHeight) { y = window.innerHeight - win.offsetHeight; dy = -Math.abs(dy); }
 
-      win.style.left = x + 'px';
-      win.style.top = y + 'px';
+      if (x + win.offsetWidth >= window.innerWidth) {
+        x = window.innerWidth - win.offsetWidth;
+        dx = -Math.abs(dx);
+      }
+
+      if (y + win.offsetHeight >= window.innerHeight) {
+        y = window.innerHeight - win.offsetHeight;
+        dy = -Math.abs(dy);
+      }
+
+      win.style.left = x + "px";
+      win.style.top = y + "px";
     }
 
     requestAnimationFrame(move);
   }
+
   requestAnimationFrame(move);
 
-  const life = randInt(20000, 45000);
-  setTimeout(() => { if (win.parentElement) win.remove(); }, life);
+  setTimeout(() => {
+    if (win.parentElement) win.remove();
+  }, randInt(minLife, maxLife));
 }
 
-// -------------------------------
-// START
-// -------------------------------
 const spawner = setInterval(createWindow, spawnInterval);
 
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
+window.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
     clearInterval(spawner);
-    document.querySelectorAll('.okno').forEach(n => n.remove());
+    document.querySelectorAll(".okno").forEach(n => n.remove());
   }
-});
-
-window.addEventListener('resize', () => {
-  document.querySelectorAll('.okno').forEach(win => {
-    let x = win.offsetLeft;
-    let y = win.offsetTop;
-    const w = win.offsetWidth, h = win.offsetHeight;
-
-    if (x + w > window.innerWidth)
-      win.style.left = (window.innerWidth - w) + 'px';
-    if (y + h > window.innerHeight)
-      win.style.top = (window.innerHeight - h) + 'px';
-  });
 });
 </script>
 
