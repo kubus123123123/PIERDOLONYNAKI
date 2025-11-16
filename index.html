@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Latające obrazki z napisami</title>
+<title>Latające obrazki turbo</title>
 
 <style>
   html,body {
@@ -61,130 +61,105 @@
     align-items:center;
     justify-content:center;
     font-size:14px;
+    line-height:1;
     cursor:pointer;
-  }
-
-  @keyframes wobble {
-    0% { transform:rotate(-10deg); }
-    50% { transform:rotate(10deg); }
-    100% { transform:rotate(-10deg); }
-  }
-
-  .okno.wobble {
-    animation: wobble 0.2s infinite;
   }
 </style>
 </head>
 <body>
 
 <script>
-// --------------------------------------
-// ULTRA SPEED
-// --------------------------------------
-const spawnInterval = 20;     // było 600 → teraz 20 ms
-const maxWindows = 1000;      // było 80 → teraz 1000
-const speedMultiplier = 20;   // było 4 → teraz 20x szybciej
-
-const minLife = 1000;         // 1 sekunda życia
-const maxLife = 4000;         // max 4 sekundy
-
+// -----------------------------------------
+// KONFIG
+// -----------------------------------------
 const images = [
-  "https://via.placeholder.com/400x220?text=A",
-  "https://via.placeholder.com/400x220?text=B",
-  "https://via.placeholder.com/400x220?text=C"
+  "https://via.placeholder.com/400x220?text=1",
+  "https://via.placeholder.com/400x220?text=2",
+  "https://via.placeholder.com/400x220?text=3"
 ];
 
 const texts = [
-  "KIEDY HOI",
-  "FACEIT PROSZE",
-  "NIGGER NIGGER",
-  "DOBROCZYŃCA PIES",
-  "NAKY TOKSYCZNA",
-  "CWEL CWEL CWEL",
+  "KIEDY HOI KIEDY HOI KIEDY HOI",
+  "O TAK CHODZMY FACEIT",
+  "NIGGER NIGGER NIGGER",
+  "DOBROCZYNCA TO PIES",
+  "NAKY TO TOKSYCZNA KURWA",
+  "CWEL CWEL CWEL CWEL",
   "JAREK NIE KRZYCZ",
-  "skibidi ohio rizz"
+  "jeden spi skibidi"
 ];
 
+const spawnInterval = 150;  // DUŻO SZYBCIEJ
+const maxWindows = 150;     // DUŻO WIĘCEJ
+
+// -----------------------------------------
+// FUNKCJE
+// -----------------------------------------
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function createWindow() {
-  if (document.querySelectorAll(".okno").length >= maxWindows) return;
+  if (document.querySelectorAll('.okno').length >= maxWindows) return;
 
-  const win = document.createElement("div");
-  win.className = "okno wobble";
+  const win = document.createElement('div');
+  win.className = 'okno';
 
-  win.style.left = randInt(0, window.innerWidth - 220) + "px";
-  win.style.top = randInt(0, window.innerHeight - 180) + "px";
+  win.style.left = randInt(0, window.innerWidth - 220) + 'px';
+  win.style.top = randInt(0, window.innerHeight - 180) + 'px';
 
-  const close = document.createElement("div");
-  close.className = "close-btn";
-  close.textContent = "×";
+  const close = document.createElement('div');
+  close.className = 'close-btn';
+  close.textContent = '×';
   close.onclick = () => win.remove();
   win.appendChild(close);
 
-  const img = document.createElement("img");
+  const img = document.createElement('img');
   img.src = images[Math.floor(Math.random() * images.length)];
   win.appendChild(img);
 
-  const caption = document.createElement("div");
-  caption.className = "caption";
+  const caption = document.createElement('div');
+  caption.className = 'caption';
   caption.textContent = texts[Math.floor(Math.random() * texts.length)];
   win.appendChild(caption);
 
   document.body.appendChild(win);
 
-  let dx = (Math.random() * 4 + 2) * (Math.random() < 0.5 ? 1 : -1) * speedMultiplier;
-  let dy = (Math.random() * 4 + 2) * (Math.random() < 0.5 ? 1 : -1) * speedMultiplier;
+  let dx = (Math.random()*4 + 2) * (Math.random()<0.5 ? 1 : -1); // SZYBCIEJ
+  let dy = (Math.random()*4 + 2) * (Math.random()<0.5 ? 1 : -1); // SZYBCIEJ
 
   let paused = false;
+  win.addEventListener('mouseenter', () => paused = true);
+  win.addEventListener('mouseleave', () => paused = false);
 
-  win.addEventListener("mouseenter", () => paused = true);
-  win.addEventListener("mouseleave", () => paused = false);
+  // TURBO RUCH – brak requestAnimationFrame
+  setInterval(() => {
+    if (!document.body.contains(win) || paused) return;
 
-  function move() {
-    if (!document.body.contains(win)) return;
+    let x = win.offsetLeft + dx;
+    let y = win.offsetTop + dy;
 
-    if (!paused) {
-      let x = win.offsetLeft + dx;
-      let y = win.offsetTop + dy;
-
-      if (x <= 0) { x = 0; dx = Math.abs(dx); }
-      if (y <= 0) { y = 0; dy = Math.abs(dy); }
-
-      if (x + win.offsetWidth >= window.innerWidth) {
-        x = window.innerWidth - win.offsetWidth;
-        dx = -Math.abs(dx);
-      }
-
-      if (y + win.offsetHeight >= window.innerHeight) {
-        y = window.innerHeight - win.offsetHeight;
-        dy = -Math.abs(dy);
-      }
-
-      win.style.left = x + "px";
-      win.style.top = y + "px";
+    if (x <= 0) { x = 0; dx = Math.abs(dx); }
+    if (y <= 0) { y = 0; dy = Math.abs(dy); }
+    if (x + win.offsetWidth >= window.innerWidth) {
+      x = window.innerWidth - win.offsetWidth;
+      dx = -Math.abs(dx);
+    }
+    if (y + win.offsetHeight >= window.innerHeight) {
+      y = window.innerHeight - win.offsetHeight;
+      dy = -Math.abs(dy);
     }
 
-    requestAnimationFrame(move);
-  }
-
-  requestAnimationFrame(move);
-
-  setTimeout(() => {
-    if (win.parentElement) win.remove();
-  }, randInt(minLife, maxLife));
+    win.style.left = x + "px";
+    win.style.top = y + "px";
+  }, 5); // **5ms = ogromna prędkość**
 }
 
-const spawner = setInterval(createWindow, spawnInterval);
+// -----------------------------------------
+// START
+// -----------------------------------------
+setInterval(createWindow, spawnInterval);
 
-window.addEventListener("keydown", e => {
-  if (e.key === "Escape") {
-    clearInterval(spawner);
-    document.querySelectorAll(".okno").forEach(n => n.remove());
-  }
-});
 </script>
 
 </body>
