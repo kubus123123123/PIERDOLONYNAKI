@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Latające obrazki z napisami</title>
+
+<style>
+  html,body {
+    height:100%;
+    margin:0;
+    background:#0b1220;
+    overflow:hidden;
+    font-family:Arial,Helvetica,sans-serif;
+  }
+
+  .okno {
+    position:absolute;
+    width:220px;
+    height:180px;
+    background:#fff;
+    border-radius:8px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    box-shadow:0 8px 20px rgba(0,0,0,0.6);
+    user-select:none;
+    cursor:default;
+  }
+
+  .okno img {
+    width:200px;
+    height:110px;
+    object-fit:cover;
+    margin-top:8px;
+    border-radius:4px;
+  }
+
+  .caption {
+    padding:8px 10px;
+    text-align:center;
+    font-weight:600;
+    color:#111;
+    font-size:14px;
+    width:100%;
+    box-sizing:border-box;
+  }
+
+  .close-btn {
+    position:absolute;
+    right:6px;
+    top:6px;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    background:rgba(0,0,0,0.65);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    line-height:1;
+    cursor:pointer;
+  }
+
+  @keyframes wobble {
+    0% { transform:rotate(-2deg); }
+    50% { transform:rotate(2deg); }
+    100% { transform:rotate(-2deg); }
+  }
+
+  .okno.wobble {
+    animation: wobble 1.2s infinite;
+  }
+</style>
+</head>
+<body>
+
+<script>
+// -------------------------------
+// KONFIGURACJA
+// -------------------------------
+const images = [
+  "https://via.placeholder.com/400x220?text=1",
+  "https://via.placeholder.com/400x220?text=2",
+  "https://via.placeholder.com/400x220?text=3"
+];
+
+const texts = [
+  "KIEDY HOI KIEDY HOI KIEDY HOI KIEDY HOI KIEDY HOI ",
+  "O TAK CHODZMY FACEIT PROSZE WAS KURWA",
+  "NIGGER NIGGER NIGGER NIGGER NIGGER NIGGER",
+  "DOBROCZYNCA TO PIES PIERDOLONY",
+  "NAKY TO TOKSYCZNA KURWA POWTARZAM WIDZOWIE",
+  "CWEL CWEL CWEL CWEL CWEL CWEL CWEL CWEL",
+  "JAREK NIE KRZYCZ PSLPLSPLSPLSPLS",
+  "jeden spi skibidi"
+];
+
+const spawnInterval = 600; 
+const maxWindows = 80;    
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// -------------------------------
+// TWORZENIE OKIENKA
+// -------------------------------
+function createWindow() {
+  if (document.querySelectorAll('.okno').length >= maxWindows) return;
+
+  const win = document.createElement('div');
+  win.className = 'okno wobble';
+
+  const startX = randInt(0, window.innerWidth - 220);
+  const startY = randInt(0, window.innerHeight - 180);
+
+  win.style.left = startX + 'px';
+  win.style.top = startY + 'px';
+
+  const close = document.createElement('div');
+  close.className = 'close-btn';
+  close.textContent = '×';
+  close.onclick = () => win.remove();
+  win.appendChild(close);
+
+  const img = document.createElement('img');
+  img.src = images[Math.floor(Math.random() * images.length)];
+  win.appendChild(img);
+
+  const caption = document.createElement('div');
+  caption.className = 'caption';
+  caption.textContent = texts[Math.floor(Math.random() * texts.length)];
+  win.appendChild(caption);
+
+  document.body.appendChild(win);
+
+  let dx = (Math.random()*3 + 0.7) * (Math.random() < 0.5 ? 1 : -1);
+  let dy = (Math.random()*2 + 0.7) * (Math.random() < 0.5 ? 1 : -1);
+
+  let paused = false;
+  win.addEventListener('mouseenter', () => paused = true);
+  win.addEventListener('mouseleave', () => paused = false);
+
+  function move() {
+    if (!document.body.contains(win)) return;
+
+    if (!paused) {
+      let x = win.offsetLeft + dx;
+      let y = win.offsetTop + dy;
+
+      if (x <= 0) { x = 0; dx = Math.abs(dx); }
+      if (y <= 0) { y = 0; dy = Math.abs(dy); }
+      if (x + win.offsetWidth >= window.innerWidth) { x = window.innerWidth - win.offsetWidth; dx = -Math.abs(dx); }
+      if (y + win.offsetHeight >= window.innerHeight) { y = window.innerHeight - win.offsetHeight; dy = -Math.abs(dy); }
+
+      win.style.left = x + 'px';
+      win.style.top = y + 'px';
+    }
+
+    requestAnimationFrame(move);
+  }
+  requestAnimationFrame(move);
+
+  const life = randInt(20000, 45000);
+  setTimeout(() => { if (win.parentElement) win.remove(); }, life);
+}
+
+// -------------------------------
+// START
+// -------------------------------
+const spawner = setInterval(createWindow, spawnInterval);
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    clearInterval(spawner);
+    document.querySelectorAll('.okno').forEach(n => n.remove());
+  }
+});
+
+window.addEventListener('resize', () => {
+  document.querySelectorAll('.okno').forEach(win => {
+    let x = win.offsetLeft;
+    let y = win.offsetTop;
+    const w = win.offsetWidth, h = win.offsetHeight;
+
+    if (x + w > window.innerWidth)
+      win.style.left = (window.innerWidth - w) + 'px';
+    if (y + h > window.innerHeight)
+      win.style.top = (window.innerHeight - h) + 'px';
+  });
+});
+</script>
+
+</body>
+</html>
